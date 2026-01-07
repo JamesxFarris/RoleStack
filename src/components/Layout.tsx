@@ -1,12 +1,15 @@
-import { Briefcase } from 'lucide-react';
+import { Briefcase, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from './ui/ThemeToggle';
+import { useSavedJobsContext } from '../context/SavedJobsContext';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const { savedCount } = useSavedJobsContext();
+
   return (
     <div className="min-h-screen min-h-dvh flex flex-col bg-surface">
       {/* Header */}
@@ -17,7 +20,22 @@ export function Layout({ children }: LayoutProps) {
               <Briefcase size={28} className="text-accent" />
               <span className="font-heading font-semibold text-xl">RoleStack</span>
             </Link>
-            <ThemeToggle />
+            
+            <div className="flex items-center gap-2">
+              <Link
+                to="/saved"
+                className="relative p-2 rounded-xl text-text-muted hover:text-accent hover:bg-surface-hover transition-all"
+                aria-label="Saved jobs"
+              >
+                <Bookmark size={22} />
+                {savedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-accent rounded-full">
+                    {savedCount > 9 ? '9+' : savedCount}
+                  </span>
+                )}
+              </Link>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>

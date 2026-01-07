@@ -6,21 +6,22 @@
   --font-sans: 'Inter Tight', system-ui, sans-serif;
   --font-heading: 'Space Grotesk', system-ui, sans-serif;
 
-  /* Light mode colors */
-  --color-surface: #ffffff;
-  --color-surface-elevated: #f8fafc;
-  --color-surface-hover: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-border-light: #f1f5f9;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
-  --color-accent: #6366f1;
-  --color-accent-hover: #4f46e5;
-  --color-accent-light: #eef2ff;
-  --color-success: #10b981;
-  --color-tag-bg: #f1f5f9;
-  --color-tag-text: #475569;
+  /* Light mode colors - Sleek emerald/teal theme */
+  --color-surface: #fafafa;
+  --color-surface-elevated: #ffffff;
+  --color-surface-hover: #f4f4f5;
+  --color-border: #e4e4e7;
+  --color-border-light: #f4f4f5;
+  --color-text-primary: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-muted: #a1a1aa;
+  --color-accent: #0d9488;
+  --color-accent-hover: #0f766e;
+  --color-accent-light: #ccfbf1;
+  --color-success: #22c55e;
+  --color-tag-bg: #f4f4f5;
+  --color-tag-text: #52525b;
+  --color-warning: #f59e0b;
 
   /* Responsive spacing scale */
   --spacing-container: clamp(1rem, 5vw, 2rem);
@@ -42,24 +43,24 @@
     @apply bg-surface text-text-primary font-sans text-sm sm:text-base;
     margin: 0;
     min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    min-height: 100dvh;
   }
 
-  /* Dark mode overrides */
+  /* Dark mode - Rich dark with teal accent */
   html.dark {
-    --color-surface: #0f172a;
-    --color-surface-elevated: #1e293b;
-    --color-surface-hover: #334155;
-    --color-border: #334155;
-    --color-border-light: #1e293b;
-    --color-text-primary: #f8fafc;
-    --color-text-secondary: #cbd5e1;
-    --color-text-muted: #64748b;
-    --color-accent: #818cf8;
-    --color-accent-hover: #6366f1;
-    --color-accent-light: #1e1b4b;
-    --color-tag-bg: #1e293b;
-    --color-tag-text: #cbd5e1;
+    --color-surface: #09090b;
+    --color-surface-elevated: #18181b;
+    --color-surface-hover: #27272a;
+    --color-border: #27272a;
+    --color-border-light: #18181b;
+    --color-text-primary: #fafafa;
+    --color-text-secondary: #a1a1aa;
+    --color-text-muted: #71717a;
+    --color-accent: #2dd4bf;
+    --color-accent-hover: #14b8a6;
+    --color-accent-light: #042f2e;
+    --color-tag-bg: #27272a;
+    --color-tag-text: #a1a1aa;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -78,82 +79,74 @@
     @apply text-lg sm:text-xl;
   }
 
-  /* Better touch targets on mobile */
   button, a, input, select, textarea {
     @apply touch-manipulation;
   }
 }
 
 @layer components {
-  /* Container with responsive padding */
   .container-responsive {
     @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
     max-width: min(1280px, 100% - 2rem);
   }
 
-  /* Buttons - larger touch targets on mobile */
   .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-3 sm:py-2.5 bg-accent text-white 
-           font-medium rounded-lg text-sm sm:text-base min-h-[44px] sm:min-h-0
+    @apply inline-flex items-center justify-center px-5 py-3 sm:py-2.5 bg-accent text-white 
+           font-semibold rounded-xl text-sm sm:text-base min-h-[44px] sm:min-h-0
            hover:bg-accent-hover active:scale-[0.98] transition-all duration-200 
            focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 
-           focus:ring-offset-surface;
+           focus:ring-offset-surface shadow-sm;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-3 sm:py-2.5 bg-surface-elevated 
-           text-text-primary font-medium rounded-lg text-sm sm:text-base min-h-[44px] sm:min-h-0
-           border border-border hover:bg-surface-hover active:scale-[0.98] transition-all
+    @apply inline-flex items-center justify-center px-5 py-3 sm:py-2.5 bg-surface-elevated 
+           text-text-primary font-semibold rounded-xl text-sm sm:text-base min-h-[44px] sm:min-h-0
+           border border-border hover:bg-surface-hover hover:border-text-muted/30 active:scale-[0.98] transition-all
            duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2
            focus:ring-offset-surface;
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center px-3 py-2 text-text-secondary
-           font-medium rounded-lg text-sm min-h-[44px] sm:min-h-0
+           font-medium rounded-xl text-sm min-h-[44px] sm:min-h-0
            hover:bg-surface-hover hover:text-text-primary active:scale-[0.98] 
            transition-all duration-200 focus:outline-none focus:ring-2 
            focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface;
   }
 
-  /* Inputs - comfortable touch targets */
   .input {
-    @apply w-full px-4 py-3 bg-surface-elevated border border-border rounded-lg 
+    @apply w-full px-4 py-3 bg-surface-elevated border border-border rounded-xl 
            text-text-primary text-base placeholder:text-text-muted min-h-[48px]
-           focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent 
+           focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent 
            transition-all duration-200;
   }
 
-  /* Cards - responsive padding */
   .card {
-    @apply bg-surface-elevated border border-border rounded-xl p-4 sm:p-6
-           hover:border-accent/30 transition-all duration-200;
+    @apply bg-surface-elevated border border-border rounded-2xl p-4 sm:p-6
+           transition-all duration-200;
   }
 
   .card-interactive {
-    @apply bg-surface-elevated border border-border rounded-xl p-4 sm:p-6
-           hover:border-accent/30 transition-all duration-200
-           cursor-pointer hover:shadow-lg hover:shadow-accent/5
+    @apply bg-surface-elevated border border-border rounded-2xl p-4 sm:p-6
+           transition-all duration-300 cursor-pointer
+           hover:border-accent/40 hover:shadow-xl hover:shadow-accent/5
            active:scale-[0.99] sm:active:scale-100;
   }
 
-  /* Tags */
   .tag {
-    @apply inline-flex items-center px-2 py-1 sm:px-2.5 text-xs font-medium 
-           rounded-md bg-tag-bg text-tag-text whitespace-nowrap;
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-medium 
+           rounded-lg bg-tag-bg text-tag-text whitespace-nowrap;
   }
 
   .tag-accent {
-    @apply inline-flex items-center px-2 py-1 sm:px-2.5 text-xs font-medium 
-           rounded-md bg-accent-light text-accent whitespace-nowrap;
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-semibold 
+           rounded-lg bg-accent-light text-accent whitespace-nowrap;
   }
 
-  /* Grid layouts */
   .grid-responsive {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
   }
 
-  /* Stack layouts for mobile */
   .stack {
     @apply flex flex-col gap-3 sm:gap-4;
   }
@@ -162,7 +155,6 @@
     @apply flex flex-col sm:flex-row gap-3 sm:gap-4;
   }
 
-  /* Search bar group */
   .search-group {
     @apply flex flex-col sm:flex-row gap-3 sm:gap-2 w-full;
   }
@@ -175,7 +167,6 @@
     @apply w-full sm:w-auto;
   }
 
-  /* Filter chips - horizontal scroll on mobile */
   .filter-chips {
     @apply flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0
            sm:overflow-visible sm:flex-wrap;
@@ -187,17 +178,16 @@
   }
 
   .filter-chip {
-    @apply inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 text-sm font-medium 
+    @apply inline-flex items-center gap-1.5 px-4 py-2 sm:py-1.5 text-sm font-medium 
            rounded-full border border-border bg-surface-elevated text-text-secondary
            whitespace-nowrap cursor-pointer transition-all duration-200
-           hover:border-accent hover:text-accent min-h-[40px] sm:min-h-0;
+           hover:border-accent hover:text-accent hover:bg-accent-light/50 min-h-[40px] sm:min-h-0;
   }
 
   .filter-chip.active {
-    @apply bg-accent border-accent text-white;
+    @apply bg-accent border-accent text-white shadow-sm;
   }
 
-  /* Hide scrollbar but keep functionality */
   .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -206,7 +196,6 @@
     display: none;
   }
 
-  /* Safe area padding for mobile notches */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }

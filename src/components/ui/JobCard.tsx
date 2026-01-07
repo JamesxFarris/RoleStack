@@ -1,5 +1,6 @@
-import { MapPin, Clock, Building2, Wifi, Home } from 'lucide-react';
+import { MapPin, Clock, Building2, Wifi, Home, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSavedJobsContext } from '../../context/SavedJobsContext';
 import type { Job } from '../../data/jobs';
 
 interface JobCardProps {
@@ -13,8 +14,16 @@ const workTypeConfig = {
 };
 
 export function JobCard({ job }: JobCardProps) {
+  const { isJobSaved, toggleSaveJob } = useSavedJobsContext();
+  const saved = isJobSaved(job.id);
   const workType = workTypeConfig[job.workType];
   const WorkTypeIcon = workType.icon;
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSaveJob(job.id);
+  };
 
   return (
     <div className="card-interactive group">
@@ -27,6 +36,17 @@ export function JobCard({ job }: JobCardProps) {
             </h3>
             <p className="text-text-secondary font-medium mt-0.5">{job.company}</p>
           </div>
+          <button
+            onClick={handleSaveClick}
+            className={\`p-2 rounded-lg transition-all duration-200 \${
+              saved
+                ? 'text-accent bg-accent-light'
+                : 'text-text-muted hover:text-accent hover:bg-surface-hover'
+            }\`}
+            aria-label={saved ? 'Remove from saved jobs' : 'Save job'}
+          >
+            <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
+          </button>
         </div>
 
         {/* Location and meta */}
@@ -54,7 +74,7 @@ export function JobCard({ job }: JobCardProps) {
         {/* Action */}
         <div className="pt-2 mt-auto">
           <Link
-            to={`/job/${job.id}`}
+            to={\`/job/\${job.id}\`}
             className="btn-secondary w-full sm:w-auto"
           >
             View Job
