@@ -1,73 +1,104 @@
-# React + TypeScript + Vite
+JobScope is a modern job discovery web application that helps job seekers explore opportunities from multiple sources, tailor their resumes to specific roles, and apply with confidence — all through a clean, user-focused interface.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is intentionally designed to be ethical, legal, and platform-compliant. JobScope does not scrape job boards, does not host applications, and does not embed proprietary content. Instead, it focuses on UI/UX excellence, safe integrations, and AI-assisted resume optimization (opt-in).
 
-Currently, two official plugins are available:
+✨ Features
+🔍 Job Search & Discovery
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Search jobs by title and location
 
-## React Compiler
+Filter by work type (Remote / Hybrid / On-site)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Clean job cards with clear call-to-action
 
-## Expanding the ESLint configuration
+Redirects users to the original job posting to apply
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+📄 Resume Tailoring (Planned)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Upload an existing resume (PDF / DOCX)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Compare resume content with a job description
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Generate a tailored version optimized for relevance and keywords
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+All changes require explicit user approval
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+No fabricated experience or credentials
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+🏢 Company Insights
+
+External links to company review platforms (e.g., Glassdoor)
+
+No embedded or scraped reviews
+
+Transparent attribution and outbound-only access
+
+🎨 Modern UI/UX
+
+Built with React and Tailwind CSS
+
+Custom typography and design system
+
+Dark mode with system preference support
+
+Fully responsive and accessible
+
+🧱 Tech Stack
+Frontend
+
+React
+
+Tailwind CSS
+
+Headless UI / Radix UI (optional)
+
+Lucide or Heroicons
+
+Custom font stack (Inter Tight / Satoshi, Space Grotesk / Clash Display)
+
+Backend (Planned)
+
+Node.js
+
+PostgreSQL
+
+Approved job listing APIs only (e.g., Adzuna, Jooble)
+
+AI (Planned)
+
+Resume parsing
+
+Skill and keyword matching
+
+Guarded AI generation with user confirmation
+
+⚖️ Legal & Compliance Principles
+
+JobScope is built with strict compliance in mind:
+
+❌ No scraping or crawling of third-party job boards
+
+❌ No ingestion or embedding of proprietary job or review content
+
+❌ No hosting of job applications
+
+✅ Job listings redirect to original sources
+
+✅ Users retain full ownership of their resumes
+
+✅ AI features are opt-in and transparent
+
+🚧 Project Status
+
+Early development / UI-first phase
+
+Current focus:
+
+Frontend architecture
+
+Component-driven UI
+
+Mock data only
+
+Live APIs, backend services, and AI features will be added incrementally once the UI and legal foundations are solid.
 ```
