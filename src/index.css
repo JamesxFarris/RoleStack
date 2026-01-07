@@ -131,7 +131,9 @@
   }
 
   .card-interactive {
-    @apply card cursor-pointer hover:shadow-lg hover:shadow-accent/5 
+    @apply bg-surface-elevated border border-border rounded-xl p-4 sm:p-6
+           hover:border-accent/30 transition-all duration-200
+           cursor-pointer hover:shadow-lg hover:shadow-accent/5
            active:scale-[0.99] sm:active:scale-100;
   }
 
@@ -175,8 +177,13 @@
 
   /* Filter chips - horizontal scroll on mobile */
   .filter-chips {
-    @apply flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 
-           sm:overflow-visible sm:flex-wrap scrollbar-none;
+    @apply flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0
+           sm:overflow-visible sm:flex-wrap;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .filter-chips::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-chip {
