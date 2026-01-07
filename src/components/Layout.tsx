@@ -12,6 +12,11 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen min-h-dvh flex flex-col bg-surface">
+      {/* Skip link for keyboard users */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-lg border-b border-border safe-area-top">
         <div className="container-responsive">
@@ -41,7 +46,7 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1">
+      <main id="main-content" className="flex-1" tabIndex={-1}>
         {children}
       </main>
 

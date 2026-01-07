@@ -31,10 +31,10 @@ const employmentTypeOptions: { value: EmploymentType; label: string; icon: React
 
 const salaryRangeOptions: { value: SalaryRange; label: string }[] = [
   { value: 'all', label: 'Any Salary' },
-  { value: '0-50k', label: '\$0 - \$50k' },
-  { value: '50k-100k', label: '\$50k - \$100k' },
-  { value: '100k-150k', label: '\$100k - \$150k' },
-  { value: '150k+', label: '\$150k+' },
+  { value: '0-50k', label: '$0 - $50k' },
+  { value: '50k-100k', label: '$50k - $100k' },
+  { value: '100k-150k', label: '$100k - $150k' },
+  { value: '150k+', label: '$150k+' },
 ];
 
 export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
@@ -66,7 +66,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
               <button
                 key={option.value}
                 onClick={() => onFilterChange({ ...filters, workType: option.value })}
-                className={\`filter-chip \${filters.workType === option.value ? 'active' : ''}\`}
+                className={`filter-chip ${filters.workType === option.value ? 'active' : ''}`}
                 aria-pressed={filters.workType === option.value}
               >
                 {option.icon}
@@ -86,7 +86,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
               <button
                 key={option.value}
                 onClick={() => onFilterChange({ ...filters, employmentType: option.value })}
-                className={\`filter-chip \${filters.employmentType === option.value ? 'active' : ''}\`}
+                className={`filter-chip ${filters.employmentType === option.value ? 'active' : ''}`}
                 aria-pressed={filters.employmentType === option.value}
               >
                 {option.icon}
@@ -107,7 +107,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
               <button
                 key={option.value}
                 onClick={() => onFilterChange({ ...filters, salaryRange: option.value })}
-                className={\`filter-chip \${filters.salaryRange === option.value ? 'active' : ''}\`}
+                className={`filter-chip ${filters.salaryRange === option.value ? 'active' : ''}`}
                 aria-pressed={filters.salaryRange === option.value}
               >
                 {option.label}

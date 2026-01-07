@@ -38,11 +38,11 @@ export function JobCard({ job }: JobCardProps) {
           </div>
           <button
             onClick={handleSaveClick}
-            className={\`p-2 rounded-lg transition-all duration-200 \${
+            className={`p-2 rounded-lg transition-all duration-200 ${
               saved
                 ? 'text-accent bg-accent-light'
                 : 'text-text-muted hover:text-accent hover:bg-surface-hover'
-            }\`}
+            }`}
             aria-label={saved ? 'Remove from saved jobs' : 'Save job'}
           >
             <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
@@ -74,7 +74,7 @@ export function JobCard({ job }: JobCardProps) {
         {/* Action */}
         <div className="pt-2 mt-auto">
           <Link
-            to={\`/job/\${job.id}\`}
+            to={`/job/${job.id}`}
             className="btn-secondary w-full sm:w-auto"
           >
             View Job

@@ -10,7 +10,9 @@ import {
   Star,
   CheckCircle2,
   Gift,
+  Bookmark,
 } from 'lucide-react';
+import { useSavedJobsContext } from '../context/SavedJobsContext';
 import { mockJobs } from '../data/jobs';
 
 const workTypeConfig = {
@@ -21,6 +23,7 @@ const workTypeConfig = {
 
 export function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { isJobSaved, toggleSaveJob } = useSavedJobsContext();
   const job = mockJobs.find((j) => j.id === id);
 
   if (!job) {
@@ -34,6 +37,7 @@ export function JobDetailPage() {
     );
   }
 
+  const saved = isJobSaved(job.id);
   const workType = workTypeConfig[job.workType];
   const WorkTypeIcon = workType.icon;
 
@@ -54,11 +58,22 @@ export function JobDetailPage() {
           {/* Header card */}
           <div className="card">
             <div className="flex flex-col gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-heading font-semibold text-text-primary">
-                  {job.title}
-                </h1>
-                <p className="text-lg text-text-secondary mt-1">{job.company}</p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-heading font-semibold text-text-primary">
+                    {job.title}
+                  </h1>
+                  <p className="text-lg text-text-secondary mt-1">{job.company}</p>
+                </div>
+                <button
+                  onClick={() => toggleSaveJob(job.id)}
+                  className={"p-3 rounded-xl transition-all duration-200 " + (saved
+                    ? "text-accent bg-accent-light"
+                    : "text-text-muted hover:text-accent hover:bg-surface-hover")}
+                  aria-label={saved ? "Remove from saved jobs" : "Save job"}
+                >
+                  <Bookmark size={24} fill={saved ? "currentColor" : "none"} />
+                </button>
               </div>
 
               {/* Meta info */}
@@ -135,7 +150,16 @@ export function JobDetailPage() {
             <p className="text-sm text-text-muted">
               Applications are handled directly by {job.company}. Click below to apply on their career site.
             </p>
-            
+
+            {/* Save button */}
+            <button
+              onClick={() => toggleSaveJob(job.id)}
+              className="btn-secondary w-full"
+            >
+              <Bookmark size={18} className="mr-2" fill={saved ? "currentColor" : "none"} />
+              {saved ? "Saved" : "Save Job"}
+            </button>
+
             {/* Apply button - external link */}
             <a
               href={job.applyUrl}
