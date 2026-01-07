@@ -1,13 +1,15 @@
-import { Home, Building2, Wifi, Clock, Briefcase, DollarSign, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export type WorkType = 'all' | 'remote' | 'hybrid' | 'onsite';
 export type EmploymentType = 'all' | 'full-time' | 'part-time' | 'contract';
 export type SalaryRange = 'all' | '0-50k' | '50k-100k' | '100k-150k' | '150k+';
+export type Seniority = 'all' | 'entry' | 'mid' | 'senior';
 
 export interface Filters {
   workType: WorkType;
   employmentType: EmploymentType;
   salaryRange: SalaryRange;
+  seniority: Seniority;
 }
 
 interface FilterPanelProps {
@@ -15,18 +17,18 @@ interface FilterPanelProps {
   onFilterChange: (filters: Filters) => void;
 }
 
-const workTypeOptions: { value: WorkType; label: string; icon: React.ReactNode }[] = [
-  { value: 'all', label: 'All Locations', icon: null },
-  { value: 'remote', label: 'Remote', icon: <Wifi size={16} /> },
-  { value: 'hybrid', label: 'Hybrid', icon: <Building2 size={16} /> },
-  { value: 'onsite', label: 'On-site', icon: <Home size={16} /> },
+const workTypeOptions: { value: WorkType; label: string }[] = [
+  { value: 'all', label: 'All Locations' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'onsite', label: 'On-site' },
 ];
 
-const employmentTypeOptions: { value: EmploymentType; label: string; icon: React.ReactNode }[] = [
-  { value: 'all', label: 'All Types', icon: null },
-  { value: 'full-time', label: 'Full-time', icon: <Briefcase size={16} /> },
-  { value: 'part-time', label: 'Part-time', icon: <Clock size={16} /> },
-  { value: 'contract', label: 'Contract', icon: <Clock size={16} /> },
+const employmentTypeOptions: { value: EmploymentType; label: string }[] = [
+  { value: 'all', label: 'All Types' },
+  { value: 'full-time', label: 'Full-time' },
+  { value: 'part-time', label: 'Part-time' },
+  { value: 'contract', label: 'Contract' },
 ];
 
 const salaryRangeOptions: { value: SalaryRange; label: string }[] = [
@@ -37,11 +39,19 @@ const salaryRangeOptions: { value: SalaryRange; label: string }[] = [
   { value: '150k+', label: '$150k+' },
 ];
 
+const seniorityOptions: { value: Seniority; label: string }[] = [
+  { value: 'all', label: 'All Levels' },
+  { value: 'entry', label: 'Entry Level' },
+  { value: 'mid', label: 'Mid Level' },
+  { value: 'senior', label: 'Senior Level' },
+];
+
 export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   const activeFiltersCount = [
     filters.workType !== 'all',
     filters.employmentType !== 'all',
     filters.salaryRange !== 'all',
+    filters.seniority !== 'all',
   ].filter(Boolean).length;
 
   const clearAllFilters = () => {
@@ -49,85 +59,77 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
       workType: 'all',
       employmentType: 'all',
       salaryRange: 'all',
+      seniority: 'all',
     });
   };
 
   return (
-    <div className="space-y-4">
-      {/* Filter sections */}
-      <div className="flex flex-col gap-4 sm:gap-6">
-        {/* Work Type */}
-        <div>
-          <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-2 px-4 sm:px-0">
-            Location
-          </h3>
-          <div className="filter-chips">
-            {workTypeOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => onFilterChange({ ...filters, workType: option.value })}
-                className={`filter-chip ${filters.workType === option.value ? 'active' : ''}`}
-                aria-pressed={filters.workType === option.value}
-              >
-                {option.icon}
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="flex flex-wrap items-center gap-3">
+      {/* Location Filter */}
+      <select
+        value={filters.workType}
+        onChange={(e) => onFilterChange({ ...filters, workType: e.target.value as WorkType })}
+        className="select"
+        aria-label="Filter by location"
+      >
+        {workTypeOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
 
-        {/* Employment Type */}
-        <div>
-          <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-2 px-4 sm:px-0">
-            Employment Type
-          </h3>
-          <div className="filter-chips">
-            {employmentTypeOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => onFilterChange({ ...filters, employmentType: option.value })}
-                className={`filter-chip ${filters.employmentType === option.value ? 'active' : ''}`}
-                aria-pressed={filters.employmentType === option.value}
-              >
-                {option.icon}
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Employment Type Filter */}
+      <select
+        value={filters.employmentType}
+        onChange={(e) => onFilterChange({ ...filters, employmentType: e.target.value as EmploymentType })}
+        className="select"
+        aria-label="Filter by employment type"
+      >
+        {employmentTypeOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
 
-        {/* Salary Range */}
-        <div>
-          <h3 className="text-xs font-medium text-text-muted uppercase tracking-wide mb-2 px-4 sm:px-0 flex items-center gap-1">
-            <DollarSign size={14} />
-            Salary Range
-          </h3>
-          <div className="filter-chips">
-            {salaryRangeOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => onFilterChange({ ...filters, salaryRange: option.value })}
-                className={`filter-chip ${filters.salaryRange === option.value ? 'active' : ''}`}
-                aria-pressed={filters.salaryRange === option.value}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Salary Range Filter */}
+      <select
+        value={filters.salaryRange}
+        onChange={(e) => onFilterChange({ ...filters, salaryRange: e.target.value as SalaryRange })}
+        className="select"
+        aria-label="Filter by salary range"
+      >
+        {salaryRangeOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Seniority Filter */}
+      <select
+        value={filters.seniority}
+        onChange={(e) => onFilterChange({ ...filters, seniority: e.target.value as Seniority })}
+        className="select"
+        aria-label="Filter by seniority level"
+      >
+        {seniorityOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
 
       {/* Clear filters button */}
       {activeFiltersCount > 0 && (
-        <div className="px-4 sm:px-0">
-          <button
-            onClick={clearAllFilters}
-            className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors"
-          >
-            <X size={16} />
-            Clear all filters ({activeFiltersCount})
-          </button>
-        </div>
+        <button
+          onClick={clearAllFilters}
+          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors ml-2"
+        >
+          <X size={16} />
+          Clear ({activeFiltersCount})
+        </button>
       )}
     </div>
   );

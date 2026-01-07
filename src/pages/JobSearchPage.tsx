@@ -11,6 +11,7 @@ const defaultFilters: Filters = {
   workType: 'all',
   employmentType: 'all',
   salaryRange: 'all',
+  seniority: 'all',
 };
 
 // Parse salary string to number for comparison
@@ -51,6 +52,7 @@ export function JobSearchPage() {
     workType: (searchParams.get('workType') as Filters['workType']) || 'all',
     employmentType: (searchParams.get('employmentType') as Filters['employmentType']) || 'all',
     salaryRange: (searchParams.get('salaryRange') as Filters['salaryRange']) || 'all',
+    seniority: (searchParams.get('seniority') as Filters['seniority']) || 'all',
   }));
 
   // Simulate initial loading
@@ -67,6 +69,7 @@ export function JobSearchPage() {
     if (filters.workType !== 'all') params.set('workType', filters.workType);
     if (filters.employmentType !== 'all') params.set('employmentType', filters.employmentType);
     if (filters.salaryRange !== 'all') params.set('salaryRange', filters.salaryRange);
+    if (filters.seniority !== 'all') params.set('seniority', filters.seniority);
 
     setSearchParams(params, { replace: true });
   }, [jobTitle, location, filters, setSearchParams]);
@@ -85,6 +88,11 @@ export function JobSearchPage() {
 
       // Salary range filter
       if (!matchesSalaryRange(job.salary, filters.salaryRange)) {
+        return false;
+      }
+
+      // Seniority filter
+      if (filters.seniority !== 'all' && job.seniority !== filters.seniority) {
         return false;
       }
 
@@ -119,6 +127,7 @@ export function JobSearchPage() {
     filters.workType !== 'all' ||
     filters.employmentType !== 'all' ||
     filters.salaryRange !== 'all' ||
+    filters.seniority !== 'all' ||
     jobTitle !== '' ||
     location !== '';
 

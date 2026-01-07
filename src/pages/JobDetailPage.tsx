@@ -16,9 +16,15 @@ import { useSavedJobsContext } from '../context/SavedJobsContext';
 import { mockJobs } from '../data/jobs';
 
 const workTypeConfig = {
-  remote: { label: 'Remote', icon: Wifi },
-  hybrid: { label: 'Hybrid', icon: Building2 },
-  onsite: { label: 'On-site', icon: Home },
+  remote: { label: 'Remote', icon: Wifi, className: 'tag-remote' },
+  hybrid: { label: 'Hybrid', icon: Building2, className: 'tag-hybrid' },
+  onsite: { label: 'On-site', icon: Home, className: 'tag-onsite' },
+};
+
+const seniorityConfig = {
+  entry: 'Entry Level',
+  mid: 'Mid Level',
+  senior: 'Senior Level',
 };
 
 export function JobDetailPage() {
@@ -90,10 +96,11 @@ export function JobDetailPage() {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2">
-                <span className="tag-accent">
+                <span className={workType.className}>
                   <WorkTypeIcon size={14} className="mr-1" />
                   {workType.label}
                 </span>
+                <span className="tag">{seniorityConfig[job.seniority]}</span>
                 <span className="tag">{job.employmentType}</span>
                 {job.salary && <span className="tag">{job.salary}</span>}
               </div>

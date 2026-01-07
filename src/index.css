@@ -134,13 +134,64 @@
   }
 
   .tag {
-    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-medium 
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-medium
            rounded-lg bg-tag-bg text-tag-text whitespace-nowrap;
   }
 
   .tag-accent {
-    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-semibold 
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-semibold
            rounded-lg bg-accent-light text-accent whitespace-nowrap;
+  }
+
+  /* Work type color-coded tags */
+  .tag-remote {
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-semibold
+           rounded-lg whitespace-nowrap;
+    background-color: #dcfce7;
+    color: #16a34a;
+  }
+
+  .tag-hybrid {
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-semibold
+           rounded-lg whitespace-nowrap;
+    background-color: #e0e7ff;
+    color: #4f46e5;
+  }
+
+  .tag-onsite {
+    @apply inline-flex items-center px-2.5 py-1 sm:px-3 text-xs font-semibold
+           rounded-lg whitespace-nowrap;
+    background-color: #ffedd5;
+    color: #ea580c;
+  }
+
+  /* Dark mode work type tags */
+  html.dark .tag-remote {
+    background-color: #14532d;
+    color: #86efac;
+  }
+
+  html.dark .tag-hybrid {
+    background-color: #312e81;
+    color: #a5b4fc;
+  }
+
+  html.dark .tag-onsite {
+    background-color: #7c2d12;
+    color: #fdba74;
+  }
+
+  /* Compact select dropdown */
+  .select {
+    @apply px-3 py-2 bg-surface-elevated border border-border rounded-lg
+           text-text-primary text-sm font-medium cursor-pointer
+           focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent
+           transition-all duration-200 appearance-none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
   }
 
   .grid-responsive {

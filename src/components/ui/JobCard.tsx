@@ -8,9 +8,15 @@ interface JobCardProps {
 }
 
 const workTypeConfig = {
-  remote: { label: 'Remote', icon: Wifi, className: 'tag-accent' },
-  hybrid: { label: 'Hybrid', icon: Building2, className: 'tag' },
-  onsite: { label: 'On-site', icon: Home, className: 'tag' },
+  remote: { label: 'Remote', icon: Wifi, className: 'tag-remote' },
+  hybrid: { label: 'Hybrid', icon: Building2, className: 'tag-hybrid' },
+  onsite: { label: 'On-site', icon: Home, className: 'tag-onsite' },
+};
+
+const seniorityConfig = {
+  entry: 'Entry Level',
+  mid: 'Mid Level',
+  senior: 'Senior Level',
 };
 
 export function JobCard({ job }: JobCardProps) {
@@ -67,6 +73,7 @@ export function JobCard({ job }: JobCardProps) {
             <WorkTypeIcon size={14} className="mr-1" />
             {workType.label}
           </span>
+          <span className="tag">{seniorityConfig[job.seniority]}</span>
           <span className="tag">{job.employmentType}</span>
           {job.salary && <span className="tag">{job.salary}</span>}
         </div>

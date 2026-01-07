@@ -5,6 +5,7 @@ export interface Job {
   location: string;
   workType: 'remote' | 'hybrid' | 'onsite';
   employmentType: 'full-time' | 'part-time' | 'contract';
+  seniority: 'entry' | 'mid' | 'senior';
   salary?: string;
   postedAt: string;
   description: string;
@@ -22,6 +23,7 @@ export const mockJobs: Job[] = [
     location: "San Francisco, CA",
     workType: "remote",
     employmentType: "full-time",
+    seniority: "senior",
     salary: "$150,000 - $200,000",
     postedAt: "2 days ago",
     description: "We are looking for a Senior Frontend Engineer to join our growing team. You will be responsible for building and maintaining our customer-facing web applications using modern technologies like React, TypeScript, and GraphQL.",
@@ -47,6 +49,7 @@ export const mockJobs: Job[] = [
     location: "New York, NY",
     workType: "hybrid",
     employmentType: "full-time",
+    seniority: "mid",
     salary: "$120,000 - $160,000",
     postedAt: "1 week ago",
     description: "Join our innovative team building the next generation of data analytics tools. You will work across the entire stack, from React frontends to Node.js backends and PostgreSQL databases.",
@@ -72,6 +75,7 @@ export const mockJobs: Job[] = [
     location: "Austin, TX",
     workType: "onsite",
     employmentType: "full-time",
+    seniority: "mid",
     salary: "$110,000 - $140,000",
     postedAt: "3 days ago",
     description: "We are seeking a talented React Native developer to help us build beautiful, performant mobile applications for iOS and Android. You will collaborate closely with designers and backend engineers.",
@@ -97,6 +101,7 @@ export const mockJobs: Job[] = [
     location: "Seattle, WA",
     workType: "remote",
     employmentType: "full-time",
+    seniority: "senior",
     salary: "$140,000 - $180,000",
     postedAt: "5 days ago",
     description: "Help us build and maintain robust, scalable infrastructure on AWS. You will be responsible for CI/CD pipelines, monitoring, security, and helping engineering teams ship faster.",
@@ -122,6 +127,7 @@ export const mockJobs: Job[] = [
     location: "Los Angeles, CA",
     workType: "hybrid",
     employmentType: "contract",
+    seniority: "senior",
     salary: "$80 - $100/hour",
     postedAt: "1 day ago",
     description: "We need a skilled UI/UX designer for a 6-month contract working on a major product redesign. You will conduct user research, create wireframes, and deliver high-fidelity designs in Figma.",
@@ -147,6 +153,7 @@ export const mockJobs: Job[] = [
     location: "Boston, MA",
     workType: "remote",
     employmentType: "full-time",
+    seniority: "mid",
     salary: "$130,000 - $170,000",
     postedAt: "4 days ago",
     description: "Join our AI startup building cutting-edge machine learning infrastructure. You will design and implement scalable APIs, data pipelines, and services that power our ML platform.",
@@ -172,6 +179,7 @@ export const mockJobs: Job[] = [
     location: "Denver, CO",
     workType: "onsite",
     employmentType: "full-time",
+    seniority: "entry",
     salary: "$70,000 - $90,000",
     postedAt: "1 week ago",
     description: "Great opportunity for early-career developers! You will learn from senior engineers while contributing to real projects. We use React, Node.js, and MongoDB.",
@@ -197,6 +205,7 @@ export const mockJobs: Job[] = [
     location: "Chicago, IL",
     workType: "hybrid",
     employmentType: "full-time",
+    seniority: "senior",
     salary: "$180,000 - $220,000",
     postedAt: "6 days ago",
     description: "Lead a team of 8 engineers building our core platform. You will balance hands-on technical work with people management, hiring, and process improvement.",
