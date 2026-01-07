@@ -1,104 +1,84 @@
-JobScope is a modern job discovery web application that helps job seekers explore opportunities from multiple sources, tailor their resumes to specific roles, and apply with confidence — all through a clean, user-focused interface.
+# JobScope
 
-This project is intentionally designed to be ethical, legal, and platform-compliant. JobScope does not scrape job boards, does not host applications, and does not embed proprietary content. Instead, it focuses on UI/UX excellence, safe integrations, and AI-assisted resume optimization (opt-in).
+> A modern, ethical job discovery platform with AI-assisted resume tailoring.
 
-✨ Features
-🔍 Job Search & Discovery
+---
 
-Search jobs by title and location
+## 📌 Table of Contents
+- [About](#about)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Roadmap](#roadmap)
+- [Legal & Compliance](#legal--compliance)
+- [Contributing](#contributing)
+- [License](#license)
 
-Filter by work type (Remote / Hybrid / On-site)
+---
 
-Clean job cards with clear call-to-action
+## 📖 About
 
-Redirects users to the original job posting to apply
+JobScope is a modern job discovery web application designed to help job seekers explore opportunities from multiple sources, tailor their resumes to specific roles, and apply with confidence.
 
-📄 Resume Tailoring (Planned)
+The platform is built with a **UI-first** approach and strict compliance standards. JobScope does not scrape job boards, host job applications, or embed proprietary review content. All job listings redirect users to the original source.
 
-Upload an existing resume (PDF / DOCX)
+---
 
-Compare resume content with a job description
+## ✨ Features
 
-Generate a tailored version optimized for relevance and keywords
+### 🔍 Job Search & Discovery
+- Search jobs by title and location
+- Filter by work type (Remote / Hybrid / On-site)
+- Clean job cards with external apply links
 
-All changes require explicit user approval
+### 📄 Resume Tailoring (Planned)
+- Resume upload (PDF / DOCX)
+- Keyword and relevance optimization
+- Explicit user approval for all changes
 
-No fabricated experience or credentials
+### 🏢 Company Insights
+- External links to company review platforms
+- No embedded or scraped review data
 
-🏢 Company Insights
+### 🎨 UI/UX
+- React + Tailwind CSS
+- Custom design system and typography
+- Dark mode support
+- Responsive and accessible
 
-External links to company review platforms (e.g., Glassdoor)
+---
 
-No embedded or scraped reviews
+## 🧱 Tech Stack
 
-Transparent attribution and outbound-only access
+### Frontend
+- React
+- Tailwind CSS
+- Headless UI / Radix UI
+- Lucide / Heroicons
 
-🎨 Modern UI/UX
+### Backend (Planned)
+- Node.js
+- PostgreSQL
+- Approved job APIs only
 
-Built with React and Tailwind CSS
+### AI (Planned)
+- Resume parsing
+- Skill matching
+- Guarded AI generation
 
-Custom typography and design system
+---
 
-Dark mode with system preference support
+## 🚀 Getting Started
 
-Fully responsive and accessible
+### Prerequisites
+- Node.js (v18+ recommended)
+- npm or pnpm
 
-🧱 Tech Stack
-Frontend
+### Installation
+```bash
+git clone https://github.com/your-username/jobscope.git
+cd jobscope
+npm install
 
-React
-
-Tailwind CSS
-
-Headless UI / Radix UI (optional)
-
-Lucide or Heroicons
-
-Custom font stack (Inter Tight / Satoshi, Space Grotesk / Clash Display)
-
-Backend (Planned)
-
-Node.js
-
-PostgreSQL
-
-Approved job listing APIs only (e.g., Adzuna, Jooble)
-
-AI (Planned)
-
-Resume parsing
-
-Skill and keyword matching
-
-Guarded AI generation with user confirmation
-
-⚖️ Legal & Compliance Principles
-
-JobScope is built with strict compliance in mind:
-
-❌ No scraping or crawling of third-party job boards
-
-❌ No ingestion or embedding of proprietary job or review content
-
-❌ No hosting of job applications
-
-✅ Job listings redirect to original sources
-
-✅ Users retain full ownership of their resumes
-
-✅ AI features are opt-in and transparent
-
-🚧 Project Status
-
-Early development / UI-first phase
-
-Current focus:
-
-Frontend architecture
-
-Component-driven UI
-
-Mock data only
-
-Live APIs, backend services, and AI features will be added incrementally once the UI and legal foundations are solid.
 ```
