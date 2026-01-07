@@ -1,4 +1,4 @@
-# JobScope
+# RoleStack
 
 > A modern, ethical job discovery platform with AI-assisted resume tailoring.
 
