@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter Tight', system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+
+  /* Light mode colors */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-accent-light: #eef2ff;
+  --color-success: #10b981;
+  --color-tag-bg: #f1f5f9;
+  --color-tag-text: #475569;
+
+  /* Responsive spacing scale */
+  --spacing-container: clamp(1rem, 5vw, 2rem);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    @apply antialiased scroll-smooth;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-surface text-text-primary font-sans text-sm sm:text-base;
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+  }
+
+  /* Dark mode overrides */
+  html.dark {
+    --color-surface: #0f172a;
+    --color-surface-elevated: #1e293b;
+    --color-surface-hover: #334155;
+    --color-border: #334155;
+    --color-border-light: #1e293b;
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #64748b;
+    --color-accent: #818cf8;
+    --color-accent-hover: #6366f1;
+    --color-accent-light: #1e1b4b;
+    --color-tag-bg: #1e293b;
+    --color-tag-text: #cbd5e1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-2xl sm:text-3xl lg:text-4xl;
+  }
+
+  h2 {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  h3 {
+    @apply text-lg sm:text-xl;
+  }
+
+  /* Better touch targets on mobile */
+  button, a, input, select, textarea {
+    @apply touch-manipulation;
+  }
+}
+
+@layer components {
+  /* Container with responsive padding */
+  .container-responsive {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: min(1280px, 100% - 2rem);
+  }
+
+  /* Buttons - larger touch targets on mobile */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-3 sm:py-2.5 bg-accent text-white 
+           font-medium rounded-lg text-sm sm:text-base min-h-[44px] sm:min-h-0
+           hover:bg-accent-hover active:scale-[0.98] transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 
+           focus:ring-offset-surface;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-3 sm:py-2.5 bg-surface-elevated 
+           text-text-primary font-medium rounded-lg text-sm sm:text-base min-h-[44px] sm:min-h-0
+           border border-border hover:bg-surface-hover active:scale-[0.98] transition-all
+           duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2
+           focus:ring-offset-surface;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-3 py-2 text-text-secondary
+           font-medium rounded-lg text-sm min-h-[44px] sm:min-h-0
+           hover:bg-surface-hover hover:text-text-primary active:scale-[0.98] 
+           transition-all duration-200 focus:outline-none focus:ring-2 
+           focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface;
+  }
+
+  /* Inputs - comfortable touch targets */
+  .input {
+    @apply w-full px-4 py-3 bg-surface-elevated border border-border rounded-lg 
+           text-text-primary text-base placeholder:text-text-muted min-h-[48px]
+           focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent 
+           transition-all duration-200;
+  }
+
+  /* Cards - responsive padding */
+  .card {
+    @apply bg-surface-elevated border border-border rounded-xl p-4 sm:p-6
+           hover:border-accent/30 transition-all duration-200;
+  }
+
+  .card-interactive {
+    @apply card cursor-pointer hover:shadow-lg hover:shadow-accent/5 
+           active:scale-[0.99] sm:active:scale-100;
+  }
+
+  /* Tags */
+  .tag {
+    @apply inline-flex items-center px-2 py-1 sm:px-2.5 text-xs font-medium 
+           rounded-md bg-tag-bg text-tag-text whitespace-nowrap;
+  }
+
+  .tag-accent {
+    @apply inline-flex items-center px-2 py-1 sm:px-2.5 text-xs font-medium 
+           rounded-md bg-accent-light text-accent whitespace-nowrap;
+  }
+
+  /* Grid layouts */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+  }
+
+  /* Stack layouts for mobile */
+  .stack {
+    @apply flex flex-col gap-3 sm:gap-4;
+  }
+
+  .stack-horizontal {
+    @apply flex flex-col sm:flex-row gap-3 sm:gap-4;
+  }
+
+  /* Search bar group */
+  .search-group {
+    @apply flex flex-col sm:flex-row gap-3 sm:gap-2 w-full;
+  }
+
+  .search-group .input {
+    @apply flex-1;
+  }
+
+  .search-group .btn-primary {
+    @apply w-full sm:w-auto;
+  }
+
+  /* Filter chips - horizontal scroll on mobile */
+  .filter-chips {
+    @apply flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 
+           sm:overflow-visible sm:flex-wrap scrollbar-none;
+  }
+
+  .filter-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 text-sm font-medium 
+           rounded-full border border-border bg-surface-elevated text-text-secondary
+           whitespace-nowrap cursor-pointer transition-all duration-200
+           hover:border-accent hover:text-accent min-h-[40px] sm:min-h-0;
+  }
+
+  .filter-chip.active {
+    @apply bg-accent border-accent text-white;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for mobile notches */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
