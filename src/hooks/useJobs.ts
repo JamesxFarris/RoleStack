@@ -19,7 +19,7 @@ export interface Job {
   companyLogo?: string;
   tags?: string[];
   category?: string;
-  source?: 'remotive' | 'jsearch' | 'arbeitnow' | 'adzuna';
+  source?: 'remotive' | 'jsearch' | 'arbeitnow' | 'adzuna' | 'serpapi' | 'usajobs' | 'careerjet' | 'reed';
 }
 
 interface JobsResponse {

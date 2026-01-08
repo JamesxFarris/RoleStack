@@ -18,7 +18,7 @@ export interface JobListing {
   companyLogo?: string;
   tags?: string[];
   category?: string;
-  source: 'remotive' | 'jsearch' | 'arbeitnow' | 'adzuna';
+  source: 'remotive' | 'jsearch' | 'arbeitnow' | 'adzuna' | 'serpapi' | 'usajobs' | 'careerjet' | 'reed';
 }
 
 // ============ Remotive API Types ============
@@ -111,6 +111,37 @@ interface AdzunaResponse {
   results: AdzunaJob[];
 }
 
+// ============ SerpApi (Google Jobs) Types ============
+interface SerpApiJob {
+  title: string;
+  company_name: string;
+  location: string;
+  description: string;
+  job_highlights?: {
+    Qualifications?: string[];
+    Responsibilities?: string[];
+    Benefits?: string[];
+  };
+  related_links?: Array<{
+    link: string;
+    text: string;
+  }>;
+  extensions?: string[];
+  detected_extensions?: {
+    posted_at?: string;
+    schedule_type?: string;
+  };
+  job_id: string;
+  thumbnail?: string;
+}
+
+interface SerpApiResponse {
+  jobs_results?: SerpApiJob[];
+  search_metadata?: {
+    status: string;
+  };
+}
+
 // ============ Caching ============
 interface CacheEntry<T> {
   data: T;
@@ -121,6 +152,7 @@ let remotiveCache: CacheEntry<JobListing[]> | null = null;
 let jsearchCache: CacheEntry<JobListing[]> | null = null;
 let arbeitnowCache: CacheEntry<JobListing[]> | null = null;
 let adzunaCache: CacheEntry<JobListing[]> | null = null;
+let serpapiCache: CacheEntry<JobListing[]> | null = null;
 
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour (conserve API calls)
 
@@ -424,6 +456,82 @@ function transformAdzunaJob(job: AdzunaJob): JobListing {
   };
 }
 
+function transformSerpApiJob(job: SerpApiJob): JobListing {
+  // Determine work type from extensions or description
+  let workType: 'remote' | 'hybrid' | 'onsite' = 'onsite';
+  const textToCheck = (job.title + ' ' + job.description + ' ' + (job.extensions?.join(' ') || '')).toLowerCase();
+
+  if (textToCheck.includes('remote') || textToCheck.includes('work from home')) {
+    workType = 'remote';
+  } else if (textToCheck.includes('hybrid')) {
+    workType = 'hybrid';
+  }
+
+  // Extract schedule type
+  let employmentType: 'full-time' | 'part-time' | 'contract' = 'full-time';
+  const scheduleType = job.detected_extensions?.schedule_type?.toLowerCase() || '';
+  if (scheduleType.includes('part') || scheduleType.includes('part-time')) {
+    employmentType = 'part-time';
+  } else if (scheduleType.includes('contract') || scheduleType.includes('contractor')) {
+    employmentType = 'contract';
+  } else if (job.extensions) {
+    // Check extensions for employment type
+    const extensionText = job.extensions.join(' ').toLowerCase();
+    if (extensionText.includes('part-time') || extensionText.includes('part time')) {
+      employmentType = 'part-time';
+    } else if (extensionText.includes('contract') || extensionText.includes('contractor')) {
+      employmentType = 'contract';
+    }
+  }
+
+  // Get apply link from related_links
+  let applyUrl = `https://www.google.com/search?q=${encodeURIComponent(job.title + ' ' + job.company_name)}`;
+  if (job.related_links && job.related_links.length > 0) {
+    const applyLink = job.related_links.find(link =>
+      link.text?.toLowerCase().includes('apply') ||
+      link.text?.toLowerCase().includes('job')
+    );
+    if (applyLink) {
+      applyUrl = applyLink.link;
+    }
+  }
+
+  // Extract posted date
+  let postedAt = 'Recently';
+  if (job.detected_extensions?.posted_at) {
+    postedAt = job.detected_extensions.posted_at;
+  } else if (job.extensions) {
+    const timeExtension = job.extensions.find(ext =>
+      ext.toLowerCase().includes('ago') ||
+      ext.toLowerCase().includes('today') ||
+      ext.toLowerCase().includes('yesterday')
+    );
+    if (timeExtension) {
+      postedAt = timeExtension;
+    }
+  }
+
+  return {
+    id: `serpapi-${job.job_id}`,
+    title: job.title,
+    company: job.company_name,
+    location: job.location || 'United States',
+    workType,
+    employmentType,
+    seniority: inferSeniority(job.title),
+    postedAt: formatPostedAt(postedAt),
+    description: stripHtml(job.description).slice(0, 500) + '...',
+    requirements: extractRequirements(job.description, job.job_highlights),
+    benefits: extractBenefits(job.description, job.job_highlights),
+    applyUrl,
+    companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name + ' ' + job.title)}`,
+    companyLogo: job.thumbnail,
+    tags: job.extensions || [],
+    category: inferCategory(job.title),
+    source: 'serpapi',
+  };
+}
+
 // ============ API Fetch Functions ============
 async function fetchRemotiveJobs(): Promise<JobListing[]> {
   if (remotiveCache && Date.now() - remotiveCache.timestamp < CACHE_DURATION) {
@@ -589,6 +697,48 @@ async function fetchAdzunaJobs(): Promise<JobListing[]> {
   }
 }
 
+async function fetchSerpApiJobs(searchQuery?: string): Promise<JobListing[]> {
+  if (serpapiCache && Date.now() - serpapiCache.timestamp < CACHE_DURATION && !searchQuery) {
+    return serpapiCache.data;
+  }
+
+  const apiKey = process.env.SERPAPI_KEY;
+  if (!apiKey) {
+    console.error('SERPAPI_KEY not configured');
+    return [];
+  }
+
+  try {
+    // Build search query for Google Jobs
+    const query = searchQuery ? `${searchQuery} jobs USA` : 'jobs USA';
+    const url = `https://serpapi.com/search.json?engine=google_jobs&q=${encodeURIComponent(query)}&api_key=${apiKey}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`SerpApi error: ${response.status}`);
+    }
+
+    const data: SerpApiResponse = await response.json();
+
+    if (!data.jobs_results || data.jobs_results.length === 0) {
+      return [];
+    }
+
+    const jobs = data.jobs_results.map(transformSerpApiJob);
+
+    if (!searchQuery) {
+      serpapiCache = { data: jobs, timestamp: Date.now() };
+    }
+
+    return jobs;
+  } catch (error) {
+    console.error('Error fetching from SerpApi:', error);
+    if (serpapiCache) return serpapiCache.data;
+    return [];
+  }
+}
+
 // ============ Main Handler ============
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -617,15 +767,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const searchQuery = typeof q === 'string' ? q : undefined;
 
     // Fetch from all APIs in parallel
-    const [remotiveJobs, jsearchJobs, arbeitnowJobs, adzunaJobs] = await Promise.all([
+    const [remotiveJobs, jsearchJobs, arbeitnowJobs, adzunaJobs, serpapiJobs] = await Promise.all([
       fetchRemotiveJobs(),
       fetchJSearchJobs(searchQuery),
       fetchArbeitnowJobs(),
       fetchAdzunaJobs(),
+      fetchSerpApiJobs(searchQuery),
     ]);
 
     // Combine all results
-    let allJobs = [...remotiveJobs, ...jsearchJobs, ...arbeitnowJobs, ...adzunaJobs];
+    let allJobs = [...remotiveJobs, ...jsearchJobs, ...arbeitnowJobs, ...adzunaJobs, ...serpapiJobs];
 
     // Apply search filter
     if (searchQuery) {
@@ -700,6 +851,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         jsearch: jsearchJobs.length,
         arbeitnow: arbeitnowJobs.length,
         adzuna: adzunaJobs.length,
+        serpapi: serpapiJobs.length,
       },
     });
   } catch (error) {
