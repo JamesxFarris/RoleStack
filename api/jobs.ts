@@ -142,6 +142,44 @@ interface SerpApiResponse {
   };
 }
 
+// ============ USAJobs API Types ============
+interface USAJobsJob {
+  MatchedObjectId: string;
+  PositionTitle: string;
+  OrganizationName: string;
+  PositionLocationDisplay: string;
+  PositionRemuneration: Array<{
+    MinimumRange: string;
+    MaximumRange: string;
+    RateIntervalCode: string;
+  }>;
+  PositionSchedule: Array<{
+    Name: string;
+    Code: string;
+  }>;
+  PublicationStartDate: string;
+  ApplicationCloseDate: string;
+  PositionFormattedDescription: Array<{
+    Content: string;
+  }>;
+  QualificationSummary: string;
+  PositionOfferingType: Array<{
+    Name: string;
+    Code: string;
+  }>;
+  ApplyURI: Array<string>;
+  PositionURI: string;
+}
+
+interface USAJobsResponse {
+  SearchResult: {
+    SearchResultItems: Array<{
+      MatchedObjectDescriptor: USAJobsJob;
+    }>;
+    SearchResultCount: number;
+  };
+}
+
 // ============ Caching ============
 interface CacheEntry<T> {
   data: T;
@@ -153,6 +191,7 @@ let jsearchCache: CacheEntry<JobListing[]> | null = null;
 let arbeitnowCache: CacheEntry<JobListing[]> | null = null;
 let adzunaCache: CacheEntry<JobListing[]> | null = null;
 let serpapiCache: CacheEntry<JobListing[]> | null = null;
+let usajobsCache: CacheEntry<JobListing[]> | null = null;
 
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour (conserve API calls)
 
@@ -532,6 +571,80 @@ function transformSerpApiJob(job: SerpApiJob): JobListing {
   };
 }
 
+function transformUSAJobsJob(job: USAJobsJob): JobListing {
+  // USAJobs are typically onsite federal government positions, but check for telework
+  let workType: 'remote' | 'hybrid' | 'onsite' = 'onsite';
+  if (job.PositionOfferingType && job.PositionOfferingType.length > 0) {
+    const offeringTypes = job.PositionOfferingType.map(t => t.Name.toLowerCase()).join(' ');
+    if (offeringTypes.includes('telework') || offeringTypes.includes('remote')) {
+      workType = 'remote';
+    }
+  }
+
+  // Extract employment type from schedule
+  let employmentType: 'full-time' | 'part-time' | 'contract' = 'full-time';
+  if (job.PositionSchedule && job.PositionSchedule.length > 0) {
+    const scheduleType = job.PositionSchedule[0].Name.toLowerCase();
+    if (scheduleType.includes('part')) {
+      employmentType = 'part-time';
+    } else if (scheduleType.includes('intermittent') || scheduleType.includes('temporary')) {
+      employmentType = 'contract';
+    }
+  }
+
+  // Extract salary
+  let salary: string | undefined;
+  if (job.PositionRemuneration && job.PositionRemuneration.length > 0) {
+    const rem = job.PositionRemuneration[0];
+    const min = parseInt(rem.MinimumRange);
+    const max = parseInt(rem.MaximumRange);
+    if (min && max) {
+      salary = `$${Math.round(min / 1000)}k - $${Math.round(max / 1000)}k`;
+    } else if (min) {
+      salary = `$${Math.round(min / 1000)}k+`;
+    }
+  }
+
+  // Calculate days since posted
+  const postedDate = new Date(job.PublicationStartDate);
+  const postedAt = formatPostedAt(postedDate.toISOString());
+
+  // Extract description
+  let description = '';
+  if (job.PositionFormattedDescription && job.PositionFormattedDescription.length > 0 && job.PositionFormattedDescription[0].Content) {
+    description = stripHtml(job.PositionFormattedDescription[0].Content).slice(0, 500) + '...';
+  }
+
+  // Extract requirements from qualification summary
+  const requirements = job.QualificationSummary
+    ? extractRequirements(job.QualificationSummary)
+    : ['See full job description for requirements'];
+
+  // Apply URL
+  const applyUrl = job.ApplyURI && job.ApplyURI.length > 0
+    ? job.ApplyURI[0]
+    : job.PositionURI;
+
+  return {
+    id: `usajobs-${job.MatchedObjectId}`,
+    title: job.PositionTitle,
+    company: job.OrganizationName,
+    location: job.PositionLocationDisplay || 'United States',
+    workType,
+    employmentType,
+    seniority: inferSeniority(job.PositionTitle),
+    salary,
+    postedAt,
+    description: description || 'See full job posting for details',
+    requirements,
+    benefits: ['Federal government benefits', 'Health insurance', 'Retirement plan', 'Paid time off'],
+    applyUrl,
+    companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.OrganizationName)}`,
+    category: inferCategory(job.PositionTitle),
+    source: 'usajobs',
+  };
+}
+
 // ============ API Fetch Functions ============
 async function fetchRemotiveJobs(): Promise<JobListing[]> {
   if (remotiveCache && Date.now() - remotiveCache.timestamp < CACHE_DURATION) {
@@ -739,6 +852,56 @@ async function fetchSerpApiJobs(searchQuery?: string): Promise<JobListing[]> {
   }
 }
 
+async function fetchUSAJobsJobs(searchQuery?: string): Promise<JobListing[]> {
+  if (usajobsCache && Date.now() - usajobsCache.timestamp < CACHE_DURATION && !searchQuery) {
+    return usajobsCache.data;
+  }
+
+  const apiKey = process.env.USAJOBS_API_KEY;
+  if (!apiKey) {
+    console.error('USAJOBS_API_KEY not configured');
+    return [];
+  }
+
+  try {
+    // Build search query
+    const keyword = searchQuery || 'software developer';
+    const url = `https://data.usajobs.gov/api/search?Keyword=${encodeURIComponent(keyword)}&ResultsPerPage=50`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Host': 'data.usajobs.gov',
+        'User-Agent': 'rolestack-job-board',
+        'Authorization-Key': apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`USAJobs API error: ${response.status}`);
+    }
+
+    const data: USAJobsResponse = await response.json();
+
+    if (!data.SearchResult || !data.SearchResult.SearchResultItems || data.SearchResult.SearchResultItems.length === 0) {
+      return [];
+    }
+
+    const jobs = data.SearchResult.SearchResultItems.map(item =>
+      transformUSAJobsJob(item.MatchedObjectDescriptor)
+    );
+
+    if (!searchQuery) {
+      usajobsCache = { data: jobs, timestamp: Date.now() };
+    }
+
+    return jobs;
+  } catch (error) {
+    console.error('Error fetching from USAJobs:', error);
+    if (usajobsCache) return usajobsCache.data;
+    return [];
+  }
+}
+
 // ============ Main Handler ============
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -767,16 +930,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const searchQuery = typeof q === 'string' ? q : undefined;
 
     // Fetch from all APIs in parallel
-    const [remotiveJobs, jsearchJobs, arbeitnowJobs, adzunaJobs, serpapiJobs] = await Promise.all([
+    const [remotiveJobs, jsearchJobs, arbeitnowJobs, adzunaJobs, serpapiJobs, usajobsJobs] = await Promise.all([
       fetchRemotiveJobs(),
       fetchJSearchJobs(searchQuery),
       fetchArbeitnowJobs(),
       fetchAdzunaJobs(),
       fetchSerpApiJobs(searchQuery),
+      fetchUSAJobsJobs(searchQuery),
     ]);
 
     // Combine all results
-    let allJobs = [...remotiveJobs, ...jsearchJobs, ...arbeitnowJobs, ...adzunaJobs, ...serpapiJobs];
+    let allJobs = [...remotiveJobs, ...jsearchJobs, ...arbeitnowJobs, ...adzunaJobs, ...serpapiJobs, ...usajobsJobs];
 
     // Apply search filter
     if (searchQuery) {
@@ -852,6 +1016,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         arbeitnow: arbeitnowJobs.length,
         adzuna: adzunaJobs.length,
         serpapi: serpapiJobs.length,
+        usajobs: usajobsJobs.length,
       },
     });
   } catch (error) {
