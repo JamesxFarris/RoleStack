@@ -1,7 +1,7 @@
 import { MapPin, Clock, Building2, Wifi, Home, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSavedJobsContext } from '../../context/SavedJobsContext';
-import type { Job } from '../../data/jobs';
+import type { Job } from '../../hooks/useJobs';
 
 interface JobCardProps {
   job: Job;

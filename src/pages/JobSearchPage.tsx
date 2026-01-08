@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchBar } from '../components/ui/SearchBar';
 import { FilterPanel, type Filters } from '../components/ui/FilterPanel';
 import { JobCard } from '../components/ui/JobCard';
 import { JobCardSkeleton } from '../components/ui/JobCardSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
-import { mockJobs } from '../data/jobs';
+import { useJobs } from '../hooks/useJobs';
 
 const defaultFilters: Filters = {
   workType: 'all',
@@ -14,36 +14,8 @@ const defaultFilters: Filters = {
   seniority: 'all',
 };
 
-// Parse salary string to number for comparison
-function parseSalary(salary?: string): number | null {
-  if (!salary) return null;
-  const match = salary.match(/\$?([\d,]+)/);
-  if (!match) return null;
-  return parseInt(match[1].replace(/,/g, ''), 10);
-}
-
-function matchesSalaryRange(salary: string | undefined, range: string): boolean {
-  if (range === 'all') return true;
-  const parsed = parseSalary(salary);
-  if (parsed === null) return false;
-
-  switch (range) {
-    case '0-50k':
-      return parsed < 50000;
-    case '50k-100k':
-      return parsed >= 50000 && parsed < 100000;
-    case '100k-150k':
-      return parsed >= 100000 && parsed < 150000;
-    case '150k+':
-      return parsed >= 150000;
-    default:
-      return true;
-  }
-}
-
 export function JobSearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(true);
 
   // Initialize state from URL params
   const [jobTitle, setJobTitle] = useState(() => searchParams.get('q') || '');
@@ -55,11 +27,12 @@ export function JobSearchPage() {
     seniority: (searchParams.get('seniority') as Filters['seniority']) || 'all',
   }));
 
-  // Simulate initial loading
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  // Fetch jobs from API
+  const { jobs, isLoading, error, total } = useJobs({
+    searchQuery: jobTitle,
+    location,
+    filters,
+  });
 
   // Update URL when filters change
   useEffect(() => {
@@ -74,53 +47,8 @@ export function JobSearchPage() {
     setSearchParams(params, { replace: true });
   }, [jobTitle, location, filters, setSearchParams]);
 
-  const filteredJobs = useMemo(() => {
-    return mockJobs.filter((job) => {
-      // Work type filter
-      if (filters.workType !== 'all' && job.workType !== filters.workType) {
-        return false;
-      }
-
-      // Employment type filter
-      if (filters.employmentType !== 'all' && job.employmentType !== filters.employmentType) {
-        return false;
-      }
-
-      // Salary range filter
-      if (!matchesSalaryRange(job.salary, filters.salaryRange)) {
-        return false;
-      }
-
-      // Seniority filter
-      if (filters.seniority !== 'all' && job.seniority !== filters.seniority) {
-        return false;
-      }
-
-      // Search filters
-      const searchJobTitle = jobTitle.toLowerCase();
-      const searchLocation = location.toLowerCase();
-
-      if (searchJobTitle) {
-        const matchesTitle =
-          job.title.toLowerCase().includes(searchJobTitle) ||
-          job.company.toLowerCase().includes(searchJobTitle);
-        if (!matchesTitle) return false;
-      }
-
-      if (searchLocation) {
-        const matchesLocation =
-          job.location.toLowerCase().includes(searchLocation) ||
-          (searchLocation.includes('remote') && job.workType === 'remote');
-        if (!matchesLocation) return false;
-      }
-
-      return true;
-    });
-  }, [jobTitle, location, filters]);
-
   const handleSearch = () => {
-    // Search is handled reactively via useMemo
-    // This can be used for analytics or future enhancements
+    // Search is handled reactively via useJobs hook
   };
 
   const hasActiveFilters =
@@ -161,36 +89,50 @@ export function JobSearchPage() {
       {/* Results count */}
       <div className="mb-4 sm:mb-6">
         <p className="text-text-muted text-sm">
-          Showing <span className="text-text-primary font-medium">{filteredJobs.length}</span>{' '}
-          {filteredJobs.length === 1 ? 'job' : 'jobs'}
+          Showing <span className="text-text-primary font-medium">{total}</span>{' '}
+          {total === 1 ? 'job' : 'jobs'}
           {hasActiveFilters && ' matching your criteria'}
         </p>
       </div>
 
+      {/* Error state */}
+      {error && (
+        <div className="text-center py-8">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button onClick={() => window.location.reload()} className="btn-secondary">
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Job listings */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {[...Array(4)].map((_, i) => (
-            <JobCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : filteredJobs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {filteredJobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title="No jobs found"
-          description="Try adjusting your search or filters to find more opportunities."
-          actionLabel="Clear all filters"
-          onAction={() => {
-            setJobTitle('');
-            setLocation('');
-            setFilters(defaultFilters);
-          }}
-        />
+      {!error && (
+        <>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {[...Array(4)].map((_, i) => (
+                <JobCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : jobs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {jobs.map((job) => (
+                <JobCard key={job.id} job={job} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="No jobs found"
+              description="Try adjusting your search or filters to find more opportunities."
+              actionLabel="Clear all filters"
+              onAction={() => {
+                setJobTitle('');
+                setLocation('');
+                setFilters(defaultFilters);
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   );
