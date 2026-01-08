@@ -51,9 +51,27 @@ interface JSearchDetailsResponse {
   data: JSearchJob[];
 }
 
+interface ArbeitnowJob {
+  slug: string;
+  company_name: string;
+  title: string;
+  description: string;
+  remote: boolean;
+  url: string;
+  tags: string[];
+  job_types: string[];
+  location: string;
+  created_at: number;
+}
+
+interface ArbeitnowResponse {
+  data: ArbeitnowJob[];
+}
+
 // ============ Caching ============
 let remotiveCache: { data: RemotiveJob[]; timestamp: number } | null = null;
-const CACHE_DURATION = 30 * 60 * 1000;
+let arbeitnowCache: { data: ArbeitnowJob[]; timestamp: number } | null = null;
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 // ============ Helper Functions ============
 function inferSeniority(title: string): 'entry' | 'mid' | 'senior' {
@@ -81,6 +99,21 @@ function inferSeniority(title: string): 'entry' | 'mid' | 'senior' {
   return 'mid';
 }
 
+function inferCategory(title: string, tags?: string[]): string {
+  const text = (title + ' ' + (tags?.join(' ') || '')).toLowerCase();
+  if (text.match(/software|developer|engineer|programming|coding|frontend|backend|fullstack/)) return 'Technology';
+  if (text.match(/marketing|seo|content|social media|brand/)) return 'Marketing';
+  if (text.match(/design|ui|ux|graphic|creative/)) return 'Design';
+  if (text.match(/sales|business development|account/)) return 'Sales';
+  if (text.match(/data|analyst|analytics|scientist/)) return 'Data';
+  if (text.match(/product|manager|management/)) return 'Product';
+  if (text.match(/finance|accounting|financial/)) return 'Finance';
+  if (text.match(/hr|human resources|recruiting|talent/)) return 'HR';
+  if (text.match(/customer|support|service/)) return 'Customer Service';
+  if (text.match(/healthcare|medical|nurse|doctor/)) return 'Healthcare';
+  return 'Other';
+}
+
 function mapEmploymentType(jobType: string): 'full-time' | 'part-time' | 'contract' {
   const type = jobType.toLowerCase();
   if (type.includes('part')) return 'part-time';
@@ -88,8 +121,8 @@ function mapEmploymentType(jobType: string): 'full-time' | 'part-time' | 'contra
   return 'full-time';
 }
 
-function formatPostedAt(dateString: string): string {
-  const date = new Date(dateString);
+function formatPostedAt(dateString: string | number): string {
+  const date = typeof dateString === 'number' ? new Date(dateString * 1000) : new Date(dateString);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return 'Today';
@@ -163,33 +196,22 @@ function extractBenefits(description: string, highlights?: { Benefits?: string[]
     return highlights.Benefits.slice(0, 5);
   }
 
-  const cleanDesc = stripHtml(description);
+  const cleanDesc = stripHtml(description).toLowerCase();
   const benefits: string[] = [];
-  const lines = cleanDesc.split(/[.!?]/).filter(line => {
-    const lower = line.toLowerCase();
-    return (
-      lower.includes('benefit') ||
-      lower.includes('insurance') ||
-      lower.includes('pto') ||
-      lower.includes('vacation') ||
-      lower.includes('401k') ||
-      lower.includes('equity') ||
-      lower.includes('stock')
-    );
-  });
-  for (const line of lines.slice(0, 4)) {
-    const trimmed = line.trim();
-    if (trimmed.length > 10 && trimmed.length < 150) {
-      benefits.push(trimmed);
-    }
-  }
+
+  if (cleanDesc.includes('health insurance') || cleanDesc.includes('medical')) benefits.push('Health Insurance');
+  if (cleanDesc.includes('401k') || cleanDesc.includes('retirement')) benefits.push('401(k)');
+  if (cleanDesc.includes('pto') || cleanDesc.includes('paid time off') || cleanDesc.includes('vacation')) benefits.push('Paid Time Off');
+  if (cleanDesc.includes('remote') || cleanDesc.includes('work from home')) benefits.push('Remote Work');
+  if (cleanDesc.includes('equity') || cleanDesc.includes('stock')) benefits.push('Equity/Stock Options');
+
   if (benefits.length === 0) {
     return ['See job posting for full benefits'];
   }
   return benefits;
 }
 
-function formatSalary(min: number | null, max: number | null, currency: string | null, period: string | null): string | undefined {
+function formatSalary(min: number | null, max: number | null, currency?: string | null, period?: string | null): string | undefined {
   if (!min && !max) return undefined;
   const formatNum = (n: number) => n >= 1000 ? `${Math.round(n / 1000)}k` : n.toString();
   let salary = '';
@@ -212,7 +234,7 @@ async function fetchRemotiveJobs(): Promise<RemotiveJob[]> {
     return remotiveCache.data;
   }
 
-  const response = await fetch('https://remotive.com/api/remote-jobs', {
+  const response = await fetch('https://remotive.com/api/remote-jobs?limit=200', {
     headers: { 'Accept': 'application/json' },
   });
 
@@ -223,6 +245,24 @@ async function fetchRemotiveJobs(): Promise<RemotiveJob[]> {
   const data: RemotiveResponse = await response.json();
   remotiveCache = { data: data.jobs, timestamp: Date.now() };
   return data.jobs;
+}
+
+async function fetchArbeitnowJobs(): Promise<ArbeitnowJob[]> {
+  if (arbeitnowCache && Date.now() - arbeitnowCache.timestamp < CACHE_DURATION) {
+    return arbeitnowCache.data;
+  }
+
+  const response = await fetch('https://www.arbeitnow.com/api/job-board-api', {
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Arbeitnow API error: ${response.status}`);
+  }
+
+  const data: ArbeitnowResponse = await response.json();
+  arbeitnowCache = { data: data.data, timestamp: Date.now() };
+  return data.data;
 }
 
 async function fetchJSearchJobById(jobId: string): Promise<JSearchJob | null> {
@@ -263,7 +303,7 @@ async function fetchJSearchJobById(jobId: string): Promise<JSearchJob | null> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
+  res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -280,7 +320,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Job ID is required' });
     }
 
-    // Determine source from ID prefix
+    // Handle Remotive jobs
     if (id.startsWith('remotive-')) {
       const remotiveId = id.replace('remotive-', '');
       const jobs = await fetchRemotiveJobs();
@@ -307,12 +347,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name + ' ' + job.title)}`,
         companyLogo: job.company_logo || undefined,
         tags: job.tags || [],
+        category: job.category || inferCategory(job.title, job.tags),
         source: 'remotive' as const,
       };
 
       return res.status(200).json({ job: transformedJob });
+    }
 
-    } else if (id.startsWith('jsearch-')) {
+    // Handle JSearch jobs
+    if (id.startsWith('jsearch-')) {
       const jsearchId = id.replace('jsearch-', '');
       const job = await fetchJSearchJobById(jsearchId);
 
@@ -320,7 +363,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Job not found' });
       }
 
-      // Determine work type
       let workType: 'remote' | 'hybrid' | 'onsite' = 'onsite';
       if (job.job_is_remote) {
         workType = 'remote';
@@ -329,7 +371,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         workType = 'hybrid';
       }
 
-      // Build location
       let location = 'United States';
       if (job.job_city && job.job_state) {
         location = `${job.job_city}, ${job.job_state}`;
@@ -359,42 +400,83 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.employer_name + ' ' + job.job_title)}`,
         companyLogo: job.employer_logo || undefined,
         tags: job.job_required_skills || [],
+        category: inferCategory(job.job_title, job.job_required_skills || undefined),
         source: 'jsearch' as const,
       };
 
       return res.status(200).json({ job: transformedJob });
+    }
 
-    } else {
-      // Legacy ID format - try Remotive first
-      const jobs = await fetchRemotiveJobs();
-      const job = jobs.find(j => j.id.toString() === id);
+    // Handle Arbeitnow jobs
+    if (id.startsWith('arbeitnow-')) {
+      const arbeitnowSlug = id.replace('arbeitnow-', '');
+      const jobs = await fetchArbeitnowJobs();
+      const job = jobs.find(j => j.slug === arbeitnowSlug);
 
       if (!job) {
         return res.status(404).json({ error: 'Job not found' });
       }
 
       const transformedJob = {
-        id: job.id.toString(),
+        id: `arbeitnow-${job.slug}`,
         title: job.title,
         company: job.company_name,
-        location: job.candidate_required_location || 'Remote',
-        workType: 'remote' as const,
-        employmentType: mapEmploymentType(job.job_type),
+        location: job.location || (job.remote ? 'Remote' : 'Unknown'),
+        workType: job.remote ? 'remote' as const : 'onsite' as const,
+        employmentType: mapEmploymentType(job.job_types?.[0] || 'full-time'),
         seniority: inferSeniority(job.title),
-        salary: job.salary || undefined,
-        postedAt: formatPostedAt(job.publication_date),
+        postedAt: formatPostedAt(job.created_at),
         description: stripHtml(job.description),
         requirements: extractRequirements(job.description),
         benefits: extractBenefits(job.description),
         applyUrl: job.url,
         companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name + ' ' + job.title)}`,
-        companyLogo: job.company_logo || undefined,
         tags: job.tags || [],
-        source: 'remotive' as const,
+        category: inferCategory(job.title, job.tags),
+        source: 'arbeitnow' as const,
       };
 
       return res.status(200).json({ job: transformedJob });
     }
+
+    // Handle Adzuna jobs - redirect to apply URL since we can't fetch individual jobs
+    if (id.startsWith('adzuna-')) {
+      // Adzuna doesn't have a single job endpoint, so we return a not found
+      // The job details were already shown from the cached list data
+      return res.status(404).json({ error: 'Please use the apply link to view this job' });
+    }
+
+    // Legacy ID format - try Remotive first
+    const jobs = await fetchRemotiveJobs();
+    const job = jobs.find(j => j.id.toString() === id);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    const transformedJob = {
+      id: job.id.toString(),
+      title: job.title,
+      company: job.company_name,
+      location: job.candidate_required_location || 'Remote',
+      workType: 'remote' as const,
+      employmentType: mapEmploymentType(job.job_type),
+      seniority: inferSeniority(job.title),
+      salary: job.salary || undefined,
+      postedAt: formatPostedAt(job.publication_date),
+      description: stripHtml(job.description),
+      requirements: extractRequirements(job.description),
+      benefits: extractBenefits(job.description),
+      applyUrl: job.url,
+      companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name + ' ' + job.title)}`,
+      companyLogo: job.company_logo || undefined,
+      tags: job.tags || [],
+      category: job.category || inferCategory(job.title, job.tags),
+      source: 'remotive' as const,
+    };
+
+    return res.status(200).json({ job: transformedJob });
+
   } catch (error) {
     console.error('API Error:', error);
     return res.status(500).json({ error: 'Failed to fetch job' });

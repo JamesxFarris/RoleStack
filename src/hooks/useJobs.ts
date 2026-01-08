@@ -18,6 +18,8 @@ export interface Job {
   companyReviewsUrl: string;
   companyLogo?: string;
   tags?: string[];
+  category?: string;
+  source?: 'remotive' | 'jsearch' | 'arbeitnow' | 'adzuna';
 }
 
 interface JobsResponse {
