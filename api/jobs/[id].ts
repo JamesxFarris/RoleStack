@@ -70,13 +70,33 @@ function formatPostedAt(dateString: string): string {
 
 function stripHtml(html: string): string {
   return html
-    .replace(/<[^>]*>/g, ' ')
+    // Preserve paragraph breaks
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
+    // Remove remaining HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Decode HTML entities
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/\s+/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ldquo;/g, '"')
+    .replace(/&bull;/g, '•')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    // Clean up whitespace while preserving line breaks
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n /g, '\n')
+    .replace(/ \n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 

@@ -1,6 +1,7 @@
 import { Briefcase, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from './ui/ThemeToggle';
+import { ScrollToTop } from './ui/ScrollToTop';
 import { useSavedJobsContext } from '../context/SavedJobsContext';
 
 interface LayoutProps {
@@ -58,6 +59,9 @@ export function Layout({ children }: LayoutProps) {
           </p>
         </div>
       </footer>
+
+      {/* Scroll to top button */}
+      <ScrollToTop />
     </div>
   );
 }
