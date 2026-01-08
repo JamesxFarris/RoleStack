@@ -184,7 +184,7 @@ function transformJob(job: RemotiveJob): JobListing {
     requirements: extractRequirements(job.description),
     benefits: ['Remote work', 'See job posting for full benefits'],
     applyUrl: job.url,
-    companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name)}`,
+    companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name + ' ' + job.title)}`,
     companyLogo: job.company_logo || undefined,
     tags: job.tags || [],
   };

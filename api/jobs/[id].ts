@@ -210,7 +210,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       requirements: extractRequirements(job.description),
       benefits: extractBenefits(job.description),
       applyUrl: job.url,
-      companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name)}`,
+      companyReviewsUrl: `https://www.glassdoor.com/Search/results.htm?keyword=${encodeURIComponent(job.company_name + ' ' + job.title)}`,
       companyLogo: job.company_logo || undefined,
       tags: job.tags || [],
     };
