@@ -79,13 +79,28 @@ export function JobCard({ job }: JobCardProps) {
         </div>
 
         {/* Action */}
-        <div className="pt-2 mt-auto">
+        <div className="pt-2 mt-auto flex items-center gap-2">
           <Link
             to={`/job/${job.id}`}
-            className="btn-secondary w-full sm:w-auto"
+            className="btn-secondary flex-1 sm:flex-none sm:w-auto"
           >
             View Job
           </Link>
+          <a
+            href={job.companyReviewsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2.5 rounded-xl border border-border bg-surface-elevated text-text-muted
+                       hover:border-[#0caa41] hover:text-[#0caa41] hover:bg-[#0caa41]/5
+                       transition-all duration-200"
+            aria-label={`View ${job.company} reviews on Glassdoor`}
+            title="Company reviews on Glassdoor"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.144 20.572H6.856c-.264 0-.48-.216-.48-.48V3.908c0-.264.216-.48.48-.48h10.288c.264 0 .48.216.48.48v16.184c0 .264-.216.48-.48.48zM6.856 0C5.008 0 3.512 1.496 3.512 3.344v17.312C3.512 22.504 5.008 24 6.856 24h10.288c1.848 0 3.344-1.496 3.344-3.344V3.344C20.488 1.496 18.992 0 17.144 0H6.856z"/>
+              <path d="M14.4 7.2h-4.8c-.264 0-.48.216-.48.48v8.64c0 .264.216.48.48.48h4.8c.264 0 .48-.216.48-.48V7.68c0-.264-.216-.48-.48-.48z"/>
+            </svg>
+          </a>
         </div>
       </div>
     </div>
