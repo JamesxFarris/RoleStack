@@ -11,9 +11,10 @@ import {
   CheckCircle2,
   Gift,
   Bookmark,
+  Loader2,
 } from 'lucide-react';
 import { useSavedJobsContext } from '../context/SavedJobsContext';
-import { mockJobs } from '../data/jobs';
+import { useJob } from '../hooks/useJob';
 
 const workTypeConfig = {
   remote: { label: 'Remote', icon: Wifi, className: 'tag-remote' },
@@ -30,12 +31,23 @@ const seniorityConfig = {
 export function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { isJobSaved, toggleSaveJob } = useSavedJobsContext();
-  const job = mockJobs.find((j) => j.id === id);
+  const { job, isLoading, error } = useJob(id);
 
-  if (!job) {
+  if (isLoading) {
     return (
       <div className="container-responsive py-12 text-center">
-        <h2 className="text-xl text-text-primary mb-4">Job not found</h2>
+        <Loader2 className="w-8 h-8 animate-spin text-accent mx-auto mb-4" />
+        <p className="text-text-muted">Loading job details...</p>
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="container-responsive py-12 text-center">
+        <h2 className="text-xl text-text-primary mb-4">
+          {error || 'Job not found'}
+        </h2>
         <Link to="/" className="btn-primary">
           Back to Jobs
         </Link>
@@ -65,11 +77,20 @@ export function JobDetailPage() {
           <div className="card">
             <div className="flex flex-col gap-4">
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-heading font-semibold text-text-primary">
-                    {job.title}
-                  </h1>
-                  <p className="text-lg text-text-secondary mt-1">{job.company}</p>
+                <div className="flex items-start gap-4">
+                  {job.companyLogo && (
+                    <img
+                      src={job.companyLogo}
+                      alt={`${job.company} logo`}
+                      className="w-16 h-16 rounded-xl object-contain bg-surface-hover p-2"
+                    />
+                  )}
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-heading font-semibold text-text-primary">
+                      {job.title}
+                    </h1>
+                    <p className="text-lg text-text-secondary mt-1">{job.company}</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => toggleSaveJob(job.id)}
@@ -104,6 +125,17 @@ export function JobDetailPage() {
                 <span className="tag">{job.employmentType}</span>
                 {job.salary && <span className="tag">{job.salary}</span>}
               </div>
+
+              {/* Tech tags */}
+              {job.tags && job.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                  {job.tags.slice(0, 8).map((tag, index) => (
+                    <span key={index} className="tag text-xs">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -112,7 +144,9 @@ export function JobDetailPage() {
             <h2 className="text-lg font-heading font-semibold text-text-primary mb-4">
               About this role
             </h2>
-            <p className="text-text-secondary leading-relaxed">{job.description}</p>
+            <p className="text-text-secondary leading-relaxed whitespace-pre-line">
+              {job.description}
+            </p>
           </div>
 
           {/* Requirements */}

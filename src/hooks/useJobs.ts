@@ -16,6 +16,8 @@ export interface Job {
   benefits: string[];
   applyUrl: string;
   companyReviewsUrl: string;
+  companyLogo?: string;
+  tags?: string[];
 }
 
 interface JobsResponse {
